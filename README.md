@@ -70,10 +70,10 @@ public class AnalizadorSintacticoBasico {
       n=cad[i].compareTo(exp[i]);
      
     if(n==0){
-        System.out.println("error sintactico");   
+        System.out.println("su sintaxis esta correcta);   
      }
     else{
-        System.out.println("su sintaxis esta correcta");
+        System.out.println("error sintactico");
     }
         
     }
