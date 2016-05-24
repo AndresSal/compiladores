@@ -30,3 +30,51 @@ public class AnalizadorSB {
     
 }
 
+
+
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+
+
+
+public class AnalizadorSintacticoBasico {
+
+    /**
+     * @param args the command line arguments
+     */
+    
+    
+    public static void main(String[] args) throws IOException {
+        // TODO code application logic here
+        String [] cad={"tipo_de_dato variable;","variable = expresion ;","vector [ expresion ] = expresion ;","if ( expresion ) then comando ;"}; 
+        
+        int n=0;
+        AnalizadorSB al =new AnalizadorSB();
+        
+        StringTokenizer tokens = new StringTokenizer(al.llenarFichero(), "\n");
+    String[] exp = new String[tokens.countTokens()] ;
+        
+    
+    for(int i=0;i<exp.length;i++){
+           exp[i]=tokens.nextToken();
+          
+    }
+    
+    for(int i=0;i<exp.length;i++)
+      n=cad[i].compareTo(exp[i]);
+     
+    if(n==0){
+        System.out.println("error sintactico");   
+     }
+    else{
+        System.out.println("su sintaxis esta correcta");
+    }
+        
+    }
+    
+    
+    
+    
+}
+
