@@ -30,7 +30,7 @@ public class AnalizadorSB {
     
 }
 
-
+# clase AnalizadorSintacticoBasico
 
 import java.io.IOException;
 import java.util.StringTokenizer;
