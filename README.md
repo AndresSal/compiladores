@@ -1,5 +1,5 @@
 # Escuela Politécnica Nacional
-# Lenguajes y Compiladores
+#  Compiladores y Lenguajes
 
 # José Limaico, Andrés Salazar
 
@@ -35,6 +35,7 @@ public class AnalizadorSB {
 }
 
 
+#clase AnalizadorSintacticoBasico
 
 import java.io.IOException;
 import java.util.StringTokenizer;
