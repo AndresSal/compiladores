@@ -1,4 +1,8 @@
-# compiladores
+# Escuela Politécnica Nacional
+# Lenguajes y Compiladores
+
+# José Limaico, Andrés Salazar
+
 # Clase AnalizadorSB
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +34,7 @@ public class AnalizadorSB {
     
 }
 
-# clase AnalizadorSintacticoBasico
+
 
 import java.io.IOException;
 import java.util.StringTokenizer;
