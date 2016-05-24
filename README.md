@@ -74,7 +74,7 @@ public class AnalizadorSintacticoBasico {
     }
 }
 
-Documento con las tokens classes evaluadas en el ejercicio
+#Documento con las tokens classes evaluadas en el ejercicio
 
 tipo_de_dato variable;
 variable = expresion ;
