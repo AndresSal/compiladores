@@ -13,3 +13,12 @@ caracter [A-Za-z]
 digito   [0-9]
 comparador <|>|<=|>=|==|!=
 %%
+{omitir}*       {;}
+{OpCompuesto}+	{fprintf(arch_out,"OP_COMPUESTO ",yytext);}
+{caresp}+	{fprintf(arch_out,"CAR_ESP ",yytext);}
+"{"            {fprintf(arch_out,"LLAV_A ",yytext);}
+"}"            {fprintf(arch_out,"LLAV_C ",yytext);}
+"("            {fprintf(arch_out,"PAR_A ",yytext);}
+")"            {fprintf(arch_out,"PAR_CER ",yytext);}
+"["            {fprintf(arch_out,"COR_A ",yytext);}
+"]"            {fprintf(arch_out,"COR_CER ",yytext);}
