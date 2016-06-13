@@ -25,3 +25,16 @@ caresp ","|";"|":"|"+"|"-"|"*"|"/"|"<"|">"|"="|"!"|"&"|"$"
 ")"            {fprintf(arch_out,"PAR_CER ",yytext);}
 "["            {fprintf(arch_out,"COR_A ",yytext);}
 "]"            {fprintf(arch_out,"COR_CER ",yytext);}
+"void"          {fprintf(arch_out,"VOID ",yytext);}
+"main"          {fprintf(arch_out,"MAIN ",yytext);}
+"int"           {fprintf(arch_out,"TD_ENTERO ",yytext);}
+"float"         {fprintf(arch_out,"TD_DECIMAL ",yytext);}
+"boolean"       {fprintf(arch_out,"TD_BOLEANO ",yytext);}
+"char"          {fprintf(arch_out,"TD_CARACTER ",yytext);}
+"string"        {fprintf(arch_out,"TD_CADENA ",yytext);}
+"if"            {fprintf(arch_out,"IF ",yytext);}
+"else"          {fprintf(arch_out,"ELSE ",yytext);}
+"else if"       {fprintf( arch_out,"ELSE_IF ",yytext);}
+"do"            {fprintf(arch_out,"DO ",yytext);}
+"while"         {fprintf(arch_out,"WHILE ",yytext);}
+"true"|"false"	{fprintf(arch_out,"BOOLEAN ",yytext);
