@@ -55,3 +55,9 @@ yylex();
 fclose(arch_out);
 
 } 
+
+
+\\Archivo de prueba
+
+TD_ENTERO IDENT CAR_ESP INTEGER CAR_ESP TD_CADENA IDENT CAR_ESP STRING INTEGER 
+
