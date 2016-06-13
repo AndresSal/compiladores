@@ -8,8 +8,6 @@ FILE *arch_out;
 %option noyywrap
 %option yylineno
 
-
-
 omitir " "|\t|\n
 caracter [A-Za-z]
 digito   [0-9]
@@ -38,3 +36,15 @@ caresp ","|";"|":"|"+"|"-"|"*"|"/"|"<"|">"|"="|"!"|"&"|"$"
 "do"            {fprintf(arch_out,"DO ",yytext);}
 "while"         {fprintf(arch_out,"WHILE ",yytext);}
 "true"|"false"	{fprintf(arch_out,"BOOLEAN ",yytext);
+{digito}+                               {fprintf(arch_out,"INTEGER ",yytext);}
+{digito}*"."{digito}+                   {fprintf(arch_out,"FLOAT ",yytext);}
+"\""({digito}|{caracter}|" ")*"\""      {fprintf(arch_out,"STRING ",yytext);}
+"\'"{caracter}{0,1}"\'"                     {fprintf(arch_out,"CHAR ",yytext);}
+{caracter}({caracter}|{digito})*        {fprintf(arch_out,"IDENT ",yytext);}
+"input:"        {fprintf(arch_out,"INPUT ",yytext);}
+"output:"       {fprintf(arch_out,"OUTPUT ",yytext);}
+"return:"       {fprintf(arch_out,"RETURN ",yytext);}
+"//".*?		{fprintf(arch_out,"comentario ",yytext);}
+"/*"[^"*/"]*	{ fprintf(arch_out,"Comentario ",yytext);}
+.		{fprintf(arch_out,"error en la linea: %d\n",yylineno);}
+%%
