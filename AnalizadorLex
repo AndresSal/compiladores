@@ -48,3 +48,10 @@ caresp ","|";"|":"|"+"|"-"|"*"|"/"|"<"|">"|"="|"!"|"&"|"$"
 "/*"[^"*/"]*	{ fprintf(arch_out,"Comentario ",yytext);}
 .		{fprintf(arch_out,"error en la linea: %d\n",yylineno);}
 %%
+main (int argc, char *argv[]){
+yyin = fopen(argv[1],"r");
+arch_out=fopen("test.txt","w");
+yylex();
+fclose(arch_out);
+
+} 
