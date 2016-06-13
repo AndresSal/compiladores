@@ -8,10 +8,13 @@ FILE *arch_out;
 %option noyywrap
 %option yylineno
 
+
+
 omitir " "|\t|\n
 caracter [A-Za-z]
 digito   [0-9]
-comparador <|>|<=|>=|==|!=
+OpCompuesto "<="|">="|"=="|"!="|"&&"|"||"
+caresp ","|";"|":"|"+"|"-"|"*"|"/"|"<"|">"|"="|"!"|"&"|"$"
 %%
 {omitir}*       {;}
 {OpCompuesto}+	{fprintf(arch_out,"OP_COMPUESTO ",yytext);}
