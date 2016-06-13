@@ -2,9 +2,6 @@
 #include <stdio.h>
 FILE *arch_out;
 %}
-%{
-#include <stdio.h>
-%}
 %option noyywrap
 %option yylineno
 
@@ -50,7 +47,7 @@ caresp ","|";"|":"|"+"|"-"|"*"|"/"|"<"|">"|"="|"!"|"&"|"$"
 %%
 main (int argc, char *argv[]){
 yyin = fopen(argv[1],"r");
-arch_out=fopen("test.txt","w");
+arch_out=fopen("prueba.txt","w");
 yylex();
 fclose(arch_out);
 
