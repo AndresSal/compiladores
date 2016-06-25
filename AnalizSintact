@@ -113,9 +113,6 @@ condicionessino    : condicionessino condicionsino
         ;
 condicionsino    : SINO PAR_A condicion PAR_CER COR_A lineascodigos COR_CER
         ;
-buclefor    : PARA PAR_A iniciafor CAR_ESP condicion CAR_ESP incredismivariable PAR_CER LLAV_A lineacodigos LLAV_C
-        ;
-iniciafor    : tipodato NOMBRECAMPO asignarvalor
         ;
 buclewhile    : MIENTRAS PAR_A condicion PAR_CER LLAV_A lineascodigos LLAV_C
         ;
