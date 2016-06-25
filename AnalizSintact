@@ -86,7 +86,6 @@ cambvalor    : valor
         | NOMBRECAMPO
         ;
 buclecondicion    : condicionif
-        | buclefor
         | buclewhile
         ;
 condicionif    : condicionsi
