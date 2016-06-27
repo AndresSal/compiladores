@@ -1,59 +1,51 @@
 %{
 #include <stdio.h>
-FILE *arch_out;
+//FILE *arch_out;
+#include "P_sintactic.tab.h";
 %}
 %option yylineno
-
 omitir " "|\t|\n
 caracter [A-Za-z]
-digito   [0-9]
-OpCompuesto "<="|">="|"=="|"!="|"&&"|"||"
-caresp ","|";"|":"|"+"|"-"|"*"|"/"|"<"|">"|"="|"!"|"&"|"$"
+digito [0-9]
+OpCompuesto "<="|">="|"=="|"!="|"&&"|"||"|"<"|">"
+caresp ","|";"|":"|"+"|"-"|"*"|"/"|"="|"!"|"&"|"$"|"++"|"--"
 %%
-{omitir}*       {;}
-{OpCompuesto}+	{fprintf(arch_out,"OP_COMPUESTO ",yytext);}
-{caresp}+	{fprintf(arch_out,"CAR_ESP ",yytext);}
-"{"            {fprintf(arch_out,"LLAV_A ",yytext);}
-"}"            {fprintf(arch_out,"LLAV_C ",yytext);}
-"("            {fprintf(arch_out,"PAR_A ",yytext);}
-")"            {fprintf(arch_out,"PAR_CER ",yytext);}
-"["            {fprintf(arch_out,"COR_A ",yytext);}
-"]"            {fprintf(arch_out,"COR_CER ",yytext);}
-"void"          {fprintf(arch_out,"VOID ",yytext);}
-"main"          {fprintf(arch_out,"MAIN ",yytext);}
-"int"           {fprintf(arch_out,"TD_ENTERO ",yytext);}
-"float"         {fprintf(arch_out,"TD_DECIMAL ",yytext);}
-"boolean"       {fprintf(arch_out,"TD_BOLEANO ",yytext);}
-"char"          {fprintf(arch_out,"TD_CARACTER ",yytext);}
-"string"        {fprintf(arch_out,"TD_CADENA ",yytext);}
-"if"            {fprintf(arch_out,"IF ",yytext);}
-"else"          {fprintf(arch_out,"ELSE ",yytext);}
-"else if"       {fprintf( arch_out,"ELSE_IF ",yytext);}
-"do"            {fprintf(arch_out,"DO ",yytext);}
-"while"         {fprintf(arch_out,"WHILE ",yytext);}
-"true"|"false"	{fprintf(arch_out,"BOOLEAN ",yytext);
-{digito}+                               {fprintf(arch_out,"INTEGER ",yytext);}
-{digito}*"."{digito}+                   {fprintf(arch_out,"FLOAT ",yytext);}
-"\""({digito}|{caracter}|" ")*"\""      {fprintf(arch_out,"STRING ",yytext);}
-"\'"{caracter}{0,1}"\'"                     {fprintf(arch_out,"CHAR ",yytext);}
-{caracter}({caracter}|{digito})*        {fprintf(arch_out,"IDENT ",yytext);}
-"input:"        {fprintf(arch_out,"INPUT ",yytext);}
-"output:"       {fprintf(arch_out,"OUTPUT ",yytext);}
-"return:"       {fprintf(arch_out,"RETURN ",yytext);}
-"//".*?		{fprintf(arch_out,"comentario ",yytext);}
-"/*"[^"*/"]*	{ fprintf(arch_out,"Comentario ",yytext);}
-.		{fprintf(arch_out,"error en la linea: %d\n",yylineno);}
+{omitir}* {;}
+{OpCompuesto}+ {return OP_COMPUESTO; }
+{caresp}+ {return CAR_ESP;}
+"{" {return LLAV_A;}
+"}" {return LLAV_C;}
+"(" {return PAR_A;}
+")" {return PAR_C;}
+"[" {return COR_A;}
+"]" {return COR_C;}
+"void" {return VOID;}
+"main" {return MAIN;}
+"int" {return TD_ENTERO;}
+"float" {return TD_DECIMAL;}
+"boolean" {return TD_BOLEANO;}
+"char" {return TD_CARACTER;}
+"string" {return TD_CADENA;}
+"if" {return IF;}
+"else" {return ELSE;}
+"else if" {return ELSE_IF;}
+"do" {return DO;}
+"while" {return WHILE;}
+"true"|"false" {return BOOLEAN;}
+{digito}+ {return INTEGER;}
+{digito}*"."{digito}+ {return FLOAT;}
+"\""({digito}|{caracter}|" ")*"\"" {return STRING;}
+"\'"{caracter}{0,1}"\'" {return CHAR;}
+{caracter}({caracter}|{digito})* {return IDENT;}
+"input:" {return INPUT;}
+"output:" {return OUTPUT;}
+"return:" {return RETURN;}
+"//".*? {return COMENTARIO;}
+"/*"[^"*/"]* { return COMENTARIOD ;}
+. {printf("error en la linea: %d\n",yylineno);}
 %%
-main (int argc, char *argv[]){
-yyin = fopen(argv[1],"r");
-arch_out=fopen("prueba.txt","w");
-yylex();
-fclose(arch_out);
-
-} 
-
-
-\\Contenido del Archivo de prueba
-
-TD_ENTERO IDENT CAR_ESP INTEGER CAR_ESP TD_CADENA IDENT CAR_ESP STRING INTEGER 
-
+main (int argc, char *argv[]){yyin = fopen(argv[1],"r");
+//arch_out=fopen("prueba.txt","w");
+yyparse();
+//fclose(arch_out);
+}
