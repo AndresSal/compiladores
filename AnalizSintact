@@ -3,17 +3,17 @@
     int yylex(void); 
     void yyerror(char *); 
 int yystopparser=0;
+FILE *arch_salida;
 %}
 
-%token VOID MAIN PAR_A PAR_CER LLAV_A LLAV_C COR_A COR_CER NOMBRECAMPO ENTERO DECIMAL BOLEANO CADENA TD_ENTERO TD_DECIMAL TD_BOLEANO TD_CADENA ASIGNADOR SUMA RESTA MULTIPLICACION DIVISION AUMENTAR DISMINUIR MAYOR MENOR IGUAL MAYORIGUAL MENORIGUAL NOIGUAL SI NO SIN PARA MIENTRAS
-
+%token OP_COMPUESTO CAR_ESP LLAV_A LLAV_C PAR_A PAR_C COR_A COR_C VOID MAIN TD_ENTERO TD_DECIMAL TD_BOLEANO TD_CARACTER TD_CADENA IF ELSE ELSE_IF DO WHILE BOOLEAN INTEGER FLOAT STRING CHAR IDENT INPUT OUTPUT RETURN COMENTARIO COMENTARIOD 
 %start programa 
 
 %%
 
 programa     : principal funciones | principal
         ;
-principal    : VOID MAIN PAR_A VOID PAR_CER LLAV_A lineascodigos LLAV_C
+principal    : VOID MAIN PAR_A VOID PAR_C LLAV_A lineascodigos LLAV_C
         ;
 lineascodigos    : lineacodigo
         |
@@ -26,7 +26,7 @@ linea        : invocarmetodo CAR_ESP
         | cambiarvalor CAR_ESP
         | bucleCondicion CAR_ESP
         ;
-invocarmetodo    : NOMBRECAMPO PAR_A parametrosenvio PAR_CER
+invocarmetodo    : IDENT PAR_A parametrosenvio PAR_C
         ;
 parametrosenvio    : parenvio
         |
@@ -35,26 +35,27 @@ parenvio    : parenvio CAR_ESP penvio
         | penvio
         ;
 penvio        : valor
-        | NOMBRECAMPO
+        | IDENT
         ;
-valor        : ENTERO
-        | DECIMAL
-        | BOLEANO
-        | CADENA
+valor        : INTEGER
+        | FLOAT
+        | STRING
+        | CHAR
+        | BOOLEAN
         ;
-crearvariable    : tipodato NOMBRECAMPO 
-        | tipodato NOMBRECAMPO asignarvalor
+crearvariable    : tipodato IDENT 
+        | tipodato IDENT  asignarvalor
         ;
-tipodato    : T_ENTERO
-        | T_DECIMAL
-        | T_BOLEANO
-        | T_CADENA
+tipodato    : TD_ENTERO
+        | TD_DECIMAL
+        | TD_BOLEANO
+        | TD_CADENA
         ;
-asignarvalor    : ASIGNADOR operaasignacion
-        | ASIGNADOR valor
-        | ASIGNADOR NOMBRECAMPO
+asignarvalor    : OP_COMPUESTO operaasignacion
+        | OP_COMPUESTO valor
+        | OP_COMPUESTO IDENT
         ;
-operasignacion    : aritmetica 
+operaasignacion    : aritmetica 
         | invocarmetodo
         | incredismivariable
         ; 
@@ -62,64 +63,60 @@ aritmetica    : oprcomun
         | oprcomun oprcomplemento
         ;
 oprcomun    : valor tipoopr valor
-        | valor tipoopr NOMBRECAMPO
-        | NOMBRECAMPO tipoopr valor
-        | NOMBRECAMPO tipoopr NOMBRECAMPO
+        | valor tipoopr IDENT
+        | IDENT tipoopr valor
+        | IDENT tipoopr IDENT
         ;
-tipoopr        : SUMA
-        | RESTA
-        | MULTIPLICACION
-        | DIVISION
+tipoopr        : CAR_ESP
+        |
         ;
 oprcomplemento    : oprcomplemento oprcom
         | oprcom
         ;
 oprcom        : tipoopr valor
-        | tipoopr NOMBRECAMPO
+        | tipoopr IDENT
         ;
-incredismivariable : NOMBRECAMPO indis
+incredismivariable : IDENT indis
         ;
-cambiarvalor    : NOMBRECAMPO ASIGNADOR cambvalor
+indis        : CAR_ESP
+        ;
+cambiarvalor    : IDENT OP_COMPUESTO cambvalor
         ;
 cambvalor    : valor
-        | operasignacion
-        | NOMBRECAMPO
+        | operaasignacion
+        | IDENT
         ;
-buclecondicion    : condicionif
+bucleCondicion    : condicionif
         | buclewhile
         ;
 condicionif    : condicionsi
         | condicionsi condicionno
-        | coondicionsi condicionessino condicionno
+        | condicionsi condicionessino condicionno
         ;
-condicionsi    : SI PAR_A condicion PAR_CER LLAV_A lineascodigos LLAV_C
+condicionsi    : IF PAR_A condicion PAR_C LLAV_A lineascodigos LLAV_C
         ;
 condicion    : valor condicional valor
-        | valor condicional NOMBRECAMPO
-        | NOMBRECAMPO condicional valor 
-        | NOMBRECAMPO condicional NOMBRECAMPO
+        | valor condicional IDENT
+        | IDENT condicional valor 
+        | IDENT condicional IDENT
         ;
-condicional    : MAYOR
-        | MENOR
-        | IGUAL
-        | MAYORIGUAL
-        | MENORIGUAL
-        | NOIGUAL
+condicional    : OP_COMPUESTO
+        |
         ; 
-condicionno    : NO LLAV_A lineascodigos LLAV_C
+condicionno    : ELSE LLAV_A lineascodigos LLAV_C
         ;
 condicionessino    : condicionessino condicionsino 
         | condicionsino
         ;
-condicionsino    : SINO PAR_A condicion PAR_CER COR_A lineascodigos COR_CER
+condicionsino    : ELSE_IF PAR_A condicion PAR_C COR_A lineascodigos COR_C
         ;
-        ;
-buclewhile    : MIENTRAS PAR_A condicion PAR_CER LLAV_A lineascodigos LLAV_C
+
+buclewhile    : WHILE PAR_A condicion PAR_C LLAV_A lineascodigos LLAV_C
         ;
 funciones    : funciones funcion
         | funcion
         ;
-funcion        : tiporetorno NOMBRECAMPO PAR_A parametrosin PAR_CER LLAV_A lineascodigos LLAV_C
+funcion        : tiporetorno IDENT PAR_A parametrosin PAR_C LLAV_A lineascodigos LLAV_C
         ;
 tiporetorno    : tipodato
         | VOID
@@ -130,7 +127,7 @@ parametrosin    : parametros
 parametros    : parametros CAR_ESP parametro
         | parametro
         ;
-parametro    : tipodato NOMBRECAMPO
+parametro    : tipodato IDENT
         ;  
 %%
 
