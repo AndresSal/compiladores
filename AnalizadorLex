@@ -1,51 +1,58 @@
 %{
 #include <stdio.h>
-//FILE *arch_out;
-#include "P_sintactic.tab.h";
+#include <conio.h>
+#include "P_sintactic.tab.h"
+FILE *arch_out;
+int num_lineas=0, errores=0;
 %}
 %option yylineno
+%option noyywrap
+
 omitir " "|\t|\n
 caracter [A-Za-z]
-digito [0-9]
-OpCompuesto "<="|">="|"=="|"!="|"&&"|"||"|"<"|">"
-caresp ","|";"|":"|"+"|"-"|"*"|"/"|"="|"!"|"&"|"$"|"++"|"--"
+digito   [0-9]
+binario [0-1]
+OpLogico "&&"|"||"
+comparacion "<="|">="|"=="|"!="|"<"|">"
+
 %%
-{omitir}* {;}
-{OpCompuesto}+ {return OP_COMPUESTO; }
-{caresp}+ {return CAR_ESP;}
-"{" {return LLAV_A;}
-"}" {return LLAV_C;}
-"(" {return PAR_A;}
-")" {return PAR_C;}
-"[" {return COR_A;}
-"]" {return COR_C;}
-"void" {return VOID;}
-"main" {return MAIN;}
-"int" {return TD_ENTERO;}
-"float" {return TD_DECIMAL;}
-"boolean" {return TD_BOLEANO;}
-"char" {return TD_CARACTER;}
-"string" {return TD_CADENA;}
-"if" {return IF;}
-"else" {return ELSE;}
-"else if" {return ELSE_IF;}
-"do" {return DO;}
-"while" {return WHILE;}
-"true"|"false" {return BOOLEAN;}
-{digito}+ {return INTEGER;}
-{digito}*"."{digito}+ {return FLOAT;}
-"\""({digito}|{caracter}|" ")*"\"" {return STRING;}
-"\'"{caracter}{0,1}"\'" {return CHAR;}
-{caracter}({caracter}|{digito})* {return IDENT;}
+
+{omitir}*       {;}
+"!"|"&"|"$"    {return CAR_ESP;}
+"{"            {return LLAV_A;}
+"}"            {return LLAV_C;}
+"("            {return PAR_A;}
+")"            {return PAR_CER;}
+"["            {return COR_A;}
+"]"            {return COR_CER;}
+"="            {return IGUAL;}
+":"            {return DOSPUNTOS;}
+";"            {return PCOMA;};
+","            {return COMA;};
+"+"|"-"|"*"|"/"	{return OPERACION;}
+"<="|">="|"=="|"!="|"<"|">" {return COMPARACION;}
+{OpLogico}	{return OPLOGICO;}
+"int"|"float"|"bool"|"char"|"String"  {yylval.string=strdup(yytext);
+		return TIPO_DATO;}
+"if" 		{return IF;}
+"else"	 	{return ELSE;}
+"else if" 	{return ELSE_IF;}
+"do" 		{return DO;}
+"while" 	{return WHILE;}
+"true"|"false" 	{return BOOLEAN;}
+{digito}+ 	{yylval.valor=atoi(yytext);return INTEGER;}
+{digito}*"."{digito}+	 {return FLOAT;}
+"\""({digito}|{caracter}|" ")*"\"" 	{return STRING;}
+"." 		{return CHAR;}
+{caracter}({caracter}|{digito})* {yylval.string=strdup(yytext);
+return IDENTIFICADOR;}
 "input:" {return INPUT;}
 "output:" {return OUTPUT;}
-"return:" {return RETURN;}
-"//".*? {return COMENTARIO;}
-"/*"[^"*/"]* { return COMENTARIOD ;}
+"//".*? {yylval=yytext;return COMENTARIO;}
+"/*"[^"*/"]* {yylval=yytext; return COMENTARIOD ;}
+\n 		++num_lineas;
 . {printf("error en la linea: %d\n",yylineno);}
 %%
-main (int argc, char *argv[]){yyin = fopen(argv[1],"r");
-//arch_out=fopen("prueba.txt","w");
-yyparse();
-//fclose(arch_out);
-}
+int yywrap (void){
+	return 1;
+} 
