@@ -1,140 +1,102 @@
 %{
 #include <stdio.h> 
-    int yylex(void); 
-    void yyerror(char *); 
-int yystopparser=0;
-FILE *arch_salida;
+#define YYSTYPE char*
+extern int yylex(void); 
+extern void yyerror(char *);
+extern int yylineno;
+extern int yylex(void);
+yyparse(void);
+extern FILE* arch_entrada;
+extern FILE* arch_salida;
+extern char* yytext;
 %}
 
-%token OP_COMPUESTO CAR_ESP LLAV_A LLAV_C PAR_A PAR_C COR_A COR_C VOID MAIN TD_ENTERO TD_DECIMAL TD_BOLEANO TD_CARACTER TD_CADENA IF ELSE ELSE_IF DO WHILE BOOLEAN INTEGER FLOAT STRING CHAR IDENT INPUT OUTPUT RETURN COMENTARIO COMENTARIOD 
-%start programa 
+%token OP_COMPUESTO
+%token CAR_ESP
+%token LLAV_A 
+%token LLAV_C 
+%token PAR_A 
+%token PAR_C 
+%token COR_A 
+%token COR_C 
+%token <tipodato>TIPO_DATO 
+%token IF 
+%token ELSE 
+%token ELSE_IF 
+%token DO 
+%token WHILE 
+%token <boleano>BOOLEAN 
+%token <entero>INTEGER 
+%token <flotante>FLOAT 
+%token STRING 
+%token CHAR 
+%token <string>IDENTIFICADOR 
+%token OPERACION
+%token OPLOGICO
+%token IGUAL
+%token COMPARACION
+%token INPUT 
+%token OUTPUT
+%token RETURN  
+%token COMENTARIO 
+%token COMENTARIOD 
+%token DOSPUNTOS
+%token PCOMA
+%token COMA 
+ 
+%union{
+int entero;
+float flotante;
+char* nombre;
+char* tipodato;
+bool boleano;
+}
 
 %%
+program:	 opfunciones program
+	 	|deGlobal
+	 	|opfunciones
+	 	;
 
-programa     : principal funciones | principal
-        ;
-principal    : VOID MAIN PAR_A VOID PAR_C LLAV_A lineascodigos LLAV_C
-        ;
-lineascodigos    : lineacodigo
-        |
-        ;
-lineacodigo    : lineacodigo linea 
-        | linea
-        ;
-linea        : invocarmetodo CAR_ESP
-        | crearvariable CAR_ESP
-        | cambiarvalor CAR_ESP
-        | bucleCondicion CAR_ESP
-        ;
-invocarmetodo    : IDENT PAR_A parametrosenvio PAR_C
-        ;
-parametrosenvio    : parenvio
-        |
-        ;
-parenvio    : parenvio CAR_ESP penvio
-        | penvio
-        ;
-penvio        : valor
-        | IDENT
-        ;
-valor        : INTEGER
-        | FLOAT
-        | STRING
-        | CHAR
-        | BOOLEAN
-        ;
-crearvariable    : tipodato IDENT 
-        | tipodato IDENT  asignarvalor
-        ;
-tipodato    : TD_ENTERO
-        | TD_DECIMAL
-        | TD_BOLEANO
-        | TD_CADENA
-        ;
-asignarvalor    : OP_COMPUESTO operaasignacion
-        | OP_COMPUESTO valor
-        | OP_COMPUESTO IDENT
-        ;
-operaasignacion    : aritmetica 
-        | invocarmetodo
-        | incredismivariable
-        ; 
-aritmetica    : oprcomun
-        | oprcomun oprcomplemento
-        ;
-oprcomun    : valor tipoopr valor
-        | valor tipoopr IDENT
-        | IDENT tipoopr valor
-        | IDENT tipoopr IDENT
-        ;
-tipoopr        : CAR_ESP
-        |
-        ;
-oprcomplemento    : oprcomplemento oprcom
-        | oprcom
-        ;
-oprcom        : tipoopr valor
-        | tipoopr IDENT
-        ;
-incredismivariable : IDENT indis
-        ;
-indis        : CAR_ESP
-        ;
-cambiarvalor    : IDENT OP_COMPUESTO cambvalor
-        ;
-cambvalor    : valor
-        | operaasignacion
-        | IDENT
-        ;
-bucleCondicion    : condicionif
-        | buclewhile
-        ;
-condicionif    : condicionsi
-        | condicionsi condicionno
-        | condicionsi condicionessino condicionno
-        ;
-condicionsi    : IF PAR_A condicion PAR_C LLAV_A lineascodigos LLAV_C
-        ;
-condicion    : valor condicional valor
-        | valor condicional IDENT
-        | IDENT condicional valor 
-        | IDENT condicional IDENT
-        ;
-condicional    : OP_COMPUESTO
-        |
-        ; 
-condicionno    : ELSE LLAV_A lineascodigos LLAV_C
-        ;
-condicionessino    : condicionessino condicionsino 
-        | condicionsino
-        ;
-condicionsino    : ELSE_IF PAR_A condicion PAR_C COR_A lineascodigos COR_C
-        ;
+deGlobal: 	 TIPO_DATO DOSPUNTOS IDENTIFICADOR PCOMA {fprint(arch_salida,"%s,%s,false,0",yylval.tipodato,yylval.nombre); }
+		|TIPO_DATO DOSPUNTOS IDENTIFICADOR LLAV_A INTEGER LLAV_C PCOMA 
+		;
+opfunciones:	 funcion
+		|deGlobal
+		|bloquecomando
+		|controlFlujo
+		;
 
-buclewhile    : WHILE PAR_A condicion PAR_C LLAV_A lineascodigos LLAV_C
-        ;
-funciones    : funciones funcion
-        | funcion
-        ;
-funcion        : tiporetorno IDENT PAR_A parametrosin PAR_C LLAV_A lineascodigos LLAV_C
-        ;
-tiporetorno    : tipodato
-        | VOID
-        ;
-parametrosin    : parametros
-        |
-        ;
-parametros    : parametros CAR_ESP parametro
-        | parametro
-        ;
-parametro    : tipodato IDENT
-        ;  
-%%
+funcion: 	 encabezado  cuerpo			      		       ;
+encabezado:      TIPO_DATO DOSPUNTOS lista
+		;
+lista: 		 PAR_A PAR_C
+		|PAR_A parametro PAR_C
+		;
+parametro: 	 deLocal 
+		|deLocal COMA parametro
+		;
+deLocal: 	 TIPO_DATO DOSPUNTOS IDENTIFICADOR {fprintf(arch_salida,"%s,%s",$1,$3);}
+		;
 
-void yyerror(char *s) {
-    fprintf(stderr, "%s\n", s);
-}
-int main(void) {
-    yyparse();
-    return 0;
-}
+cuerpo: 	 bloquecomando PCOMA
+		|bloquecomando PCOMA cuerpo
+		|deLocal PCOMA
+		|deLocal PCOMA cuerpo
+		;
+bloquecomando: 	 LLAV_A  LLAV_C
+		|LLAV_A comandosimple LLAV_C
+		;
+comandosimple: 	 atribucion PCOMA
+		|atribucion PCOMA comandosimple
+		|opES
+		|opES comandosimple
+		|controlFlujo
+		|controlFlujo comandosimple
+		|bloquecomando
+		|bloquecomando comandosimple
+		|llamarfuncion
+		|llamarfuncion comandosimple
+		;
+
+
