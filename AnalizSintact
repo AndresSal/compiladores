@@ -1,55 +1,63 @@
 %{
+#include "proyect.h"
 #include <stdio.h> 
-#define YYSTYPE char*
+#include <string.h>
 extern int yylex(void); 
 extern void yyerror(char *);
 extern int yylineno;
-extern int yylex(void);
-yyparse(void);
-extern FILE* arch_entrada;
-extern FILE* arch_salida;
+FILE* arch_entrada;
+FILE* arch_salida;
 extern char* yytext;
+char  buffer[128];
 %}
 
 %token OP_COMPUESTO
 %token CAR_ESP
-%token LLAV_A 
-%token LLAV_C 
-%token PAR_A 
-%token PAR_C 
-%token COR_A 
-%token COR_C 
+%token <agrup>LLAV_A 
+%token <agrup>LLAV_C 
+%token <agrup>PAR_A 
+%token <agrup>PAR_C 
+%token <agrup>COR_A 
+%token <agrup>COR_C 
 %token <tipodato>TIPO_DATO 
 %token IF 
 %token ELSE 
 %token ELSE_IF 
 %token DO 
 %token WHILE 
-%token <boleano>BOOLEAN 
+%token BOOLEAN 
 %token <entero>INTEGER 
 %token <flotante>FLOAT 
-%token STRING 
-%token CHAR 
-%token <string>IDENTIFICADOR 
-%token OPERACION
-%token OPLOGICO
+%token <string>STRING 
+%token <string>CHAR 
+%token <ident>IDENTIFICADOR 
+%token <op>OPERACION
+%token <opl>OPLOGICO
 %token IGUAL
-%token COMPARACION
-%token INPUT 
-%token OUTPUT
-%token RETURN  
+%token <comp>COMPARACION
+%token <io>INPUT 
+%token <io>OUTPUT
+%token <io>RETURN  
 %token COMENTARIO 
 %token COMENTARIOD 
-%token DOSPUNTOS
-%token PCOMA
-%token COMA 
+%token <asig>DOSPUNTOS
+%token <pcoma>PCOMA
+%token <coma>COMA 
  
 %union{
 int entero;
 float flotante;
-char* nombre;
+char* string;
 char* tipodato;
-bool boleano;
+char* ident;
+char* agrup;
+char* io;
+char* asig;
+char* op;
+char* opl;
+char* comp;
+char* pcoma;
+char* coma;
 }
 
 %%
@@ -58,8 +66,8 @@ program:	 opfunciones program
 	 	|opfunciones
 	 	;
 
-deGlobal: 	 TIPO_DATO DOSPUNTOS IDENTIFICADOR PCOMA {fprint(arch_salida,"%s,%s,false,0",yylval.tipodato,yylval.nombre); }
-		|TIPO_DATO DOSPUNTOS IDENTIFICADOR LLAV_A INTEGER LLAV_C PCOMA 
+deGlobal: 	 TIPO_DATO DOSPUNTOS IDENTIFICADOR PCOMA {armarlinea($1,yylval.tipodato);}
+		|TIPO_DATO DOSPUNTOS IDENTIFICADOR COR_A INTEGER COR_C PCOMA 
 		;
 opfunciones:	 funcion
 		|deGlobal
@@ -67,16 +75,17 @@ opfunciones:	 funcion
 		|controlFlujo
 		;
 
-funcion: 	 encabezado  cuerpo			      		       ;
-encabezado:      TIPO_DATO DOSPUNTOS lista
+funcion: 	 encabezado  cuerpo			      	               ;
+encabezado:      TIPO_DATO DOSPUNTOS lista 
 		;
-lista: 		 PAR_A PAR_C
+lista: 		 PAR_A PAR_C {armarlinea($1,yylval.agrup);
+		}
 		|PAR_A parametro PAR_C
 		;
 parametro: 	 deLocal 
 		|deLocal COMA parametro
 		;
-deLocal: 	 TIPO_DATO DOSPUNTOS IDENTIFICADOR {fprintf(arch_salida,"%s,%s",$1,$3);}
+deLocal: 	 TIPO_DATO DOSPUNTOS IDENTIFICADOR
 		;
 
 cuerpo: 	 bloquecomando PCOMA
@@ -98,5 +107,108 @@ comandosimple: 	 atribucion PCOMA
 		|llamarfuncion
 		|llamarfuncion comandosimple
 		;
+atribucion: 	 IDENTIFICADOR IGUAL expresion
+		|IDENTIFICADOR COR_A expresion COR_C IGUAL expresion
+		;
+opES:		 INPUT valor
+		|OUTPUT valor
+		|RETURN valor
+		;
+expresion: 	 valor
+		|valor operar expresion
+		|PAR_A expresion PAR_C
+		; 
+valor: 		 IDENTIFICADOR
+		|INTEGER
+		|FLOAT
+		|STRING
+		|BOOLEAN
+		|CHAR
+		;
+operar: 	 OPERACION
+		|OPLOGICO
+		;
+controlFlujo: 	 IF PAR_A expresion PAR_C LLAV_A comandosimple LLAV_C
+		|IF PAR_A expresion PAR_C LLAV_A comandosimple LLAV_C ELSE comandosimple
+		|WHILE PAR_A expresion PAR_C DO LLAV_A comandosimple LLAV_C
+		|DO PAR_A expresion PAR_C LLAV_A comandosimple LLAV_C WHILE PAR_A expresion PAR_C
+		;
+llamarfuncion: 	 IDENTIFICADOR PAR_A PAR_C PCOMA
+		|IDENTIFICADOR PAR_A parametroF PAR_C PCOMA
+		;
+parametroF: 	 valor
+		|valor PCOMA parametroF
+		;
+%%
+
+int  main(){
+printf("Lectura del archivo...\n\n");
+arch_salida=fopen("salida.csv","w");
+int comillas=34;
+int coma=44;
+char separador[3];
+separador[0]=comillas;
+separador[1]=coma;
+separador[2]=comillas;
+char linea[128];
+linea[0]=comillas;
+char lexema[6];
+memcpy(lexema,"Lexema",6);
+char toke[13];
+memcpy(toke,"Tipo de Token",13);
+memcpy(linea+1, lexema,6);
+memcpy(linea+7, separador,3);
+memcpy(linea+10,toke,13);
+linea[23]=comillas;
+memcpy(linea+24,"\n",1);
+linea[25]=0;
+
+printf(linea);
+fprintf(arch_salida,linea);
+
+arch_entrada=fopen("./prueba.txt","r");
+if(arch_entrada==NULL){
+
+arch_entrada=stdin;
+}else{
+printf("Archivo abierto \n\n");
+yyin=arch_entrada;
+yyparse();
+fclose(arch_entrada);
+}
+//yyparse();
+//while (fgets(buffer,128,arch_entrada)!=NULL);
+fclose(arch_salida);
+return 0;
+}
+
+void yyerror  (char* s){
+FILE *nota;
+nota=fopen("errores.txt","w");
+fprintf(nota,"%d: %s en %s \n ",yylineno,s,yytext);
+fclose(nota);
+}
 
 
+
+void armarlinea(char *lexema, char *token){
+
+int comillas=34;
+int coma=44;
+char separador[3];
+separador[0]=comillas;
+separador[1]=coma;
+separador[2]=comillas;
+char linea[128];
+
+linea[0]=comillas;
+memcpy(linea+1, lexema,strlen(lexema));
+memcpy(linea+1+strlen(lexema), separador,3);
+memcpy(linea+strlen(lexema)+4,token,strlen(token));
+char *a=linea+strlen(lexema)+4+strlen(token);
+int pos=strlen(lexema)+4+strlen(token);
+linea[pos]=comillas;
+memcpy(a+1,"\n",1);
+fprintf(arch_salida,linea);
+
+}
