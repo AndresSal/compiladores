@@ -1,12 +1,9 @@
+%option yylineno
 %{
 #include <stdio.h>
-#include <conio.h>
-#include "P_sintactic.tab.h"
-FILE *arch_out;
-int num_lineas=0, errores=0;
+#include "proyect.tab.h"
+int num_lineas=1;
 %}
-%option yylineno
-%option noyywrap
 
 omitir " "|\t|\n
 caracter [A-Za-z]
@@ -19,20 +16,20 @@ comparacion "<="|">="|"=="|"!="|"<"|">"
 
 {omitir}*       {;}
 "!"|"&"|"$"    {return CAR_ESP;}
-"{"            {return LLAV_A;}
-"}"            {return LLAV_C;}
-"("            {return PAR_A;}
-")"            {return PAR_CER;}
-"["            {return COR_A;}
-"]"            {return COR_CER;}
+"{"            {yylval.agrup=strdup(yytext);return LLAV_A;}
+"}"            {yylval.agrup=strdup(yytext);return LLAV_C;}
+"("            {yylval.agrup=strdup(yytext);return PAR_A;}
+")"            {yylval.agrup=strdup(yytext);return PAR_C;}
+"["            {yylval.agrup=strdup(yytext);return COR_A;}
+"]"            {yylval.agrup=strdup(yytext);return COR_C;}
 "="            {return IGUAL;}
-":"            {return DOSPUNTOS;}
-";"            {return PCOMA;};
-","            {return COMA;};
-"+"|"-"|"*"|"/"	{return OPERACION;}
-"<="|">="|"=="|"!="|"<"|">" {return COMPARACION;}
-{OpLogico}	{return OPLOGICO;}
-"int"|"float"|"bool"|"char"|"String"  {yylval.string=strdup(yytext);
+":"            {yylval.asig=strdup(yytext);return DOSPUNTOS;}
+";"            {yylval.pcoma=strdup(yytext);return PCOMA;};
+","            {yylval.coma=strdup(yytext);return COMA;};
+"+"|"-"|"*"|"/"	{yylval.op=strdup(yytext);return OPERACION;}
+"<="|">="|"=="|"!="|"<"|">" {yylval.comp=strdup(yytext);return COMPARACION;}
+{OpLogico}	{yylval.opl=strdup(yytext);return OPLOGICO;}
+"int"|"float"|"bool"|"char"|"String"  {yylval.tipodato=strdup(yytext);
 		return TIPO_DATO;}
 "if" 		{return IF;}
 "else"	 	{return ELSE;}
@@ -40,19 +37,20 @@ comparacion "<="|">="|"=="|"!="|"<"|">"
 "do" 		{return DO;}
 "while" 	{return WHILE;}
 "true"|"false" 	{return BOOLEAN;}
-{digito}+ 	{yylval.valor=atoi(yytext);return INTEGER;}
-{digito}*"."{digito}+	 {return FLOAT;}
-"\""({digito}|{caracter}|" ")*"\"" 	{return STRING;}
-"." 		{return CHAR;}
-{caracter}({caracter}|{digito})* {yylval.string=strdup(yytext);
+{digito}+ 	{yylval.entero=atoi(yytext);return INTEGER;}
+{digito}*"."{digito}+	 {yylval.flotante=atof(yytext);return FLOAT;}
+"\""({digito}|{caracter}|" ")*"\"" 	{yylval.string=strdup(yytext);return STRING;}
+"." 		{yylval.string=strdup(yytext);return CHAR;}
+{caracter}({caracter}|{digito})* {yylval.ident=strdup(yytext);
 return IDENTIFICADOR;}
-"input:" {return INPUT;}
-"output:" {return OUTPUT;}
-"//".*? {yylval=yytext;return COMENTARIO;}
-"/*"[^"*/"]* {yylval=yytext; return COMENTARIOD ;}
-\n 		++num_lineas;
-. {printf("error en la linea: %d\n",yylineno);}
+"input" {yylval.io=strdup(yytext);return INPUT;}
+"output" {yylval.io=strdup(yytext);return OUTPUT;}
+"return" {yylval.io=strdup(yytext);return RETURN;}
+"//".*? {return COMENTARIO;}
+"/*"[^"*/"]* {return COMENTARIOD;};
+. {printf("error léxico en la linea: %d\n",yylineno);}
 %%
-int yywrap (void){
-	return 1;
-} 
+
+int yywrap(void){
+return 1;
+}
