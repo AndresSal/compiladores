@@ -1,0 +1,113 @@
+%{
+#include <stdio.h>
+FILE *arch;
+extern int yylineno;
+int yylex(void); 
+void yyerror(char *); 
+
+%}
+
+%union {int num;char *td;char *id;char *b;char *c;char *s;float f;}
+
+
+%token DOSPUNTOS <id>IDENT PCOMA IGUAL PAR_A PAR_C COR_A COR_C LLAV_A LLAV_C <td>TD_ENTERO <td>TD_DECIMAL <td>TD_BOLEANO <td>TD_CARACTER <td>TD_CADENA <num>INTEGER <f>FLOAT <s>STRING <c>CHAR <b>BOOLEAN COMA IF ELSE THEN DO WHILE OPERACION COMPARACION OPLOGICO INPUT OUTPUT COMENTARIO COMENTARIOD
+%type<td> tipodato
+%start programa
+
+ 
+%%
+programa 	:exp1 funcion | programa exp1 funcion
+exp1		: tipodato DOSPUNTOS IDENT PCOMA 			{fprintf(arch,"%s,%s",$1,$3);}
+		| tipodato DOSPUNTOS IDENT IGUAL INTEGER PCOMA		{fprintf(arch,"%s,%s,%d\n",$1,$3,$5);}
+		| tipodato DOSPUNTOS IDENT IGUAL BOOLEAN PCOMA		{fprintf(arch,"%s,%s,%s\n",$1,$3,$5);}
+		| tipodato DOSPUNTOS IDENT IGUAL CHAR PCOMA		{fprintf(arch,"%s,%s,%s\n",$1,$3,$5);}
+		| tipodato DOSPUNTOS IDENT IGUAL STRING PCOMA		{fprintf(arch,"%s,%s,%s\n",$1,$3,$5);}
+		| tipodato DOSPUNTOS IDENT IGUAL FLOAT PCOMA		{fprintf(arch,"%s,%s,%f\n",$1,$3,$5);}
+		| tipodato DOSPUNTOS IDENT COR_A INTEGER COR_C PCOMA 	{fprintf(arch,"%s,%s,%d\n",$1,$3,$5);}
+		; 				
+
+tipodato	:TD_ENTERO
+		|TD_DECIMAL 	
+		| TD_BOLEANO 	
+		| TD_CARACTER 	
+		| TD_CADENA	
+		; 
+
+funcion: 	 encabezado cuerpo;
+encabezado:      tipodato DOSPUNTOS IDENT lista {fprintf(arch,"declaracion funcion\n");}
+		;
+lista: 		 PAR_A  PAR_C
+		|PAR_A parametro PAR_C
+		;
+parametro: 	 deLocal 
+		|deLocal COMA parametro
+		;
+deLocal: 	 tipodato DOSPUNTOS IDENT
+		;
+cuerpo: 	 bloquecomando PCOMA
+		|bloquecomando PCOMA cuerpo
+		|deLocal PCOMA
+		|deLocal PCOMA cuerpo
+		;
+bloquecomando: 	 LLAV_A  LLAV_C
+		|LLAV_A comandosimple LLAV_C
+		;
+comandosimple: 	 atribucion PCOMA
+		|atribucion PCOMA comandosimple
+		|opES
+		|opES comandosimple
+		|controlFlujo
+		|controlFlujo comandosimple
+		|bloquecomando
+		|bloquecomando comandosimple
+		|llamarfuncion
+		|llamarfuncion comandosimple
+		;
+atribucion: 	 IDENT IGUAL expresion
+		|IDENT COR_A expresion COR_C IGUAL expresion
+		;
+opES:		 INPUT valor
+		|OUTPUT valor
+		|RETURN valor
+		;
+expresion: 	 valor
+		|valor operar expresion
+		|PAR_A expresion PAR_C
+		; 
+valor: 		 IDENT
+		|INTEGER
+		|FLOAT
+		|STRING
+		|BOOLEAN
+		|CHAR
+		;
+operar: 	 OPERACION
+		|OPLOGICO
+		;
+controlFlujo: 	 IF PAR_A expresion PAR_C THEN LLAV_A comandosimple LLAV_C
+		|IF PAR_A expresion PAR_C THEN LLAV_A comandosimple LLAV_C ELSE comandosimple
+		|WHILE PAR_A expresion PAR_C DO LLAV_A comandosimple LLAV_C
+		|DO PAR_A expresion PAR_C LLAV_A comandosimple LLAV_C WHILE PAR_A expresion PAR_C
+		;
+llamarfuncion: 	 IDENTIFICADOR PAR_A PAR_C PCOMA
+		|IDENTIFICADOR PAR_A parametroF PAR_C PCOMA
+		;
+parametroF: 	 valor
+		|valor PCOMA parametroF
+		;
+
+			
+%%
+
+void yyerror(char *s) {
+ fprintf(stderr, "%s\n", s); 
+}
+
+int main (int argc, char *argv[]){
+extern FILE * yyin;
+yyin=fopen(argv[1],"r");
+arch=fopen("prueba.txt","w");
+yyparse();
+fclose(arch);
+return 0;
+}
