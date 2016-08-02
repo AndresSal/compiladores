@@ -1,0 +1,43 @@
+#ifndef SYMBOLTABLE_H
+#define SYMBOLTABLE_H
+
+// estructura usada para almacenar una entrada 
+struct entry_s {
+	int type;		
+        char *lexeme;		
+	float value;		
+        struct entry_s *next;	
+};
+typedef struct entry_s entry_t;
+
+// Estructura para almacenar la tabla de simbolos
+struct table_s {
+        int t_size;             
+        entry_t *t_head;        
+};
+typedef struct table_s table_t;
+
+// tabla de simbolos
+table_t table;
+
+// inicializa la tabla de simbolos 
+void init_table();
+
+// crea una nueva entrada y retorna un apuntador 
+entry_t *create_entry(int type, const char *lexeme, float value);
+
+// pone la entrada al inicio de la tabla de simbolos 
+void put_entry(entry_t *new_entry);
+
+entry_t *get_entry(const char *lexeme);
+
+// retorna el valor numerico de la entrada
+float get_value(const char *lexeme);
+
+// coloca un nuevo valor numerico para la entrada
+void set_value(const char *lexeme, float value);
+
+//retorna el tipo de la entrada 
+int get_type(const char *lexeme);
+
+#endif
